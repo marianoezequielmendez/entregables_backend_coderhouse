@@ -1,4 +1,4 @@
-import { log } from "console";
+// import { log } from "console";
 import { existsSync, promises } from "fs";
 
 class ProductManager {
@@ -36,25 +36,36 @@ class ProductManager {
     }
   }
 
-  async addProduct(title, description, price, thumbnail, code, stock) {
+  async addProduct(
+    title,
+    description,
+    code,
+    price,
+    status = true,
+    stock,
+    thumbnail = []
+  ) {
     try {
-      if (title && description && price && thumbnail && code && stock) {
+      if (title && description && code && price && stock) {
         const products = await this.getProducts();
 
         const obj = {
           id: this.controlaId(products),
           title: title,
           description: description,
-          price: price,
-          thumbnail: thumbnail,
           code: code,
+          price: price,
+          status: status,
           stock: stock,
+          thumbnail: thumbnail,
         };
 
         products.push(obj);
         await promises.writeFile(this.path, JSON.stringify(products));
+
+        return obj;
       } else {
-        console.log("Todos los requerimientos son obligatorios");
+        return false;
       }
     } catch (error) {
       console.log(error);
@@ -92,10 +103,11 @@ class ProductManager {
       });
 
       if (notFounderMsg) {
-        console.log("No existen productos con el id seleccionado");
+        return false;
       }
 
       await promises.writeFile(this.path, JSON.stringify(products));
+      return true;
     } catch (error) {
       console.log(error);
     }
@@ -123,4 +135,6 @@ class ProductManager {
   }
 }
 
-export const productManager = new ProductManager("products.json");
+export const productManager = new ProductManager(
+  "./src/database/products.json"
+);
